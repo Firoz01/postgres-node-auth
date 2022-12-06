@@ -14,23 +14,31 @@ model User {
   id Int @id @default(autoincrement())
   email String @unique 
   phone String?
-  package Package?
+  vocavive vocavive_user?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@unique([id,email])
 }
 
-model edvive_apps {
-   id Int @id @default(autoincrement())
-   name String @unique
+model vocavive_user {
+  id Int @id @default(autoincrement())
+  package Package? @relation(fields: [package_id], references: [id])
+  package_id Int? 
+  user User @relation(fields: [userId,userEmail], references: [id,email])
+  userId Int 
+  userEmail String 
+  parchase Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId, userEmail])
 }
 
 model Package {
   id Int @id @default(autoincrement())
   name String
   title String
-  user User @relation(fields: [userId], references: [id])
-  userId Int @unique
-  variations Variation[] @relation()
+  vocavive_user vocavive_user[]
+  variations Variation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -38,12 +46,13 @@ model Package {
 model Variation {
   id Int @id @default(autoincrement())
   expiration Int
-  btd Int
-  discount_bdt Int
-  usd Int 
-  discount_usd Int
-  status Boolean
-  packages Package[] @relation()
+  bdt Int 
+  discount_bdt Int @default(00)
+  usd Int @default(00)
+  discount_usd Int @default(00)
+  status Boolean @default(false)
+  packages Package? @relation(fields: [package_id], references: [id], onDelete: Cascade)
+  package_id Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
