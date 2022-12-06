@@ -15,6 +15,7 @@ model User {
   email String @unique 
   phone String?
   vocavive vocavive_user?
+  coursebook coursebook_user?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([id,email])
@@ -32,12 +33,25 @@ model vocavive_user {
   updatedAt DateTime @updatedAt
   @@unique([userId, userEmail])
 }
+model coursebook_user {
+  id Int @id @default(autoincrement())
+  package Package? @relation(fields: [package_id], references: [id])
+  package_id Int? 
+  user User @relation(fields: [userId,userEmail], references: [id,email])
+  userId Int 
+  userEmail String 
+  parchase Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId, userEmail])
+}
 
 model Package {
   id Int @id @default(autoincrement())
   name String
   title String
   vocavive_user vocavive_user[]
+  coursebook_user coursebook_user[]
   variations Variation[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

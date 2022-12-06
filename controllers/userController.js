@@ -1,4 +1,3 @@
-const { async } = require('@firebase/util');
 const prisma = require('../client');
 const {
   createFirebaseUser,
@@ -28,23 +27,6 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
   } else {
     res.status(500).json(result);
   }
-
-  // const user = await prisma.user.upsert({
-  //   where: {
-  //     email: email,
-  //   },
-  //   update: {},
-  //   create: {
-  //     email: email,
-  //     phone: phone,
-  //     vocavive: {
-  //       create: {},
-  //     },
-  //   },
-  //   include: {
-  //     vocavive: true,
-  //   },
-  // });
 });
 
 exports.vocaviveSignIn = catchAsync(async (req, res) => {
@@ -62,14 +44,14 @@ exports.vocaviveSignIn = catchAsync(async (req, res) => {
       },
     });
 
-    if (getUser) {
+    if (getUser.length !== 0) {
       res.status(200).json({
         status: 'Success',
         message: 'Signin Successfully in vocavive app',
         data: getUser,
       });
     } else {
-      const getUser = prisma.user.findMany({
+      const getUser = prisma.user.findUnique({
         where: {
           email,
         },
@@ -78,6 +60,50 @@ exports.vocaviveSignIn = catchAsync(async (req, res) => {
         },
       });
       res.status(200).json(getUser);
+    }
+  }
+});
+exports.coursebookSignIn = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+  const result = await signInFirebaseUser(email, password);
+  if (result?.user) {
+    const getUser = await prisma.user.findMany({
+      where: {
+        coursebook: {
+          userEmail: email,
+        },
+      },
+      include: {
+        coursebook: {},
+      },
+    });
+
+    if (getUser.length !== 0) {
+      res.status(200).json({
+        status: 'Success',
+        message: 'Signin Successfully in coursebook app',
+        data: getUser,
+      });
+    } else {
+      const getUser = await prisma.user.findUnique({
+        where: {
+          email,
+        },
+        select: {
+          id: true,
+          email: true,
+        },
+      });
+      if (getUser?.id) {
+        const saveUserInCoursebookDb = await prisma.coursebook_user.create({
+          data: {
+            userId: getUser.id,
+            userEmail: getUser.email,
+          },
+        });
+        console.log(saveUserInCoursebookDb);
+        res.status(200).json(saveUserInCoursebookDb);
+      }
     }
   }
 });
