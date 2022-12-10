@@ -3,8 +3,15 @@ const prisma = require("../client");
 const {
   createFirebaseUser,
   signInFirebaseUser,
+  passwordResetEmail,
 } = require("../Firebase/firebaseFunction");
 const catchAsync = require("../utils/catchAsync");
+
+exports.passwordReset = catchAsync(async (req, res) => {
+  const result = await passwordResetEmail(req.body.email);
+  console.log(result)
+  res.status(200).json(result);
+});
 
 exports.vocaviveSignup = catchAsync(async (req, res) => {
   console.log("api hitted");
