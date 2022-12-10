@@ -54,13 +54,14 @@ exports.passwordResetEmail = async (email) => {
   return data;
 };
 
-exports.verifyPasswordResetCode = async (oobCode) => {
+exports.userPasswordChange = async (idToken, password) => {
   const body = {
-    oobCode,
+    idToken,
+    password,
   };
 
   const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:resetPassword?key=${WEB_KEY}`,
+    `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${WEB_KEY}`,
     {
       method: "post",
       body: JSON.stringify(body),

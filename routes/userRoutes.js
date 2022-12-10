@@ -3,6 +3,7 @@ const userController = require("../controllers/userController");
 
 const router = express.Router();
 router.post("/password-reset", userController.passwordReset);
+router.post("/password-change", userController.passwordChange);
 router.post("/vocavive-signup", userController.vocaviveSignup);
 router.post("/vocavive-signin", userController.vocaviveSignIn);
 router.post("/coursebook-signin", userController.coursebookSignIn);
