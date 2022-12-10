@@ -1,16 +1,17 @@
-const prisma = require('../client');
+const prisma = require("../client");
+
 const {
   createFirebaseUser,
   signInFirebaseUser,
-} = require('../Firebase/firebaseFunction');
-const catchAsync = require('../utils/catchAsync');
+} = require("../Firebase/firebaseFunction");
+const catchAsync = require("../utils/catchAsync");
 
 exports.vocaviveSignup = catchAsync(async (req, res) => {
-  console.log('api hitted');
+  console.log("api hitted");
   const { email, password, phone } = req.body;
 
   const result = await createFirebaseUser(email, password);
-  if (result?.user) {
+  if (result?.email) {
     const user = await prisma.user.create({
       data: {
         email,
@@ -32,7 +33,8 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
 exports.vocaviveSignIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const result = await signInFirebaseUser(email, password);
-  if (result?.user) {
+  console.log(result);
+  if (result?.email) {
     const getUser = await prisma.user.findMany({
       where: {
         vocavive: {
@@ -46,8 +48,8 @@ exports.vocaviveSignIn = catchAsync(async (req, res) => {
 
     if (getUser.length !== 0) {
       res.status(200).json({
-        status: 'Success',
-        message: 'Signin Successfully in vocavive app',
+        status: "Success",
+        message: "Signin Successfully in vocavive app",
         data: getUser,
       });
     } else {
@@ -61,12 +63,14 @@ exports.vocaviveSignIn = catchAsync(async (req, res) => {
       });
       res.status(200).json(getUser);
     }
+  } else {
+    res.status(404).json("User not found");
   }
 });
 exports.coursebookSignIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const result = await signInFirebaseUser(email, password);
-  if (result?.user) {
+  if (result?.email) {
     const getUser = await prisma.user.findMany({
       where: {
         coursebook: {
@@ -80,8 +84,8 @@ exports.coursebookSignIn = catchAsync(async (req, res) => {
 
     if (getUser.length !== 0) {
       res.status(200).json({
-        status: 'Success',
-        message: 'Signin Successfully in coursebook app',
+        status: "Success",
+        message: "Signin Successfully in coursebook app",
         data: getUser,
       });
     } else {
@@ -131,12 +135,12 @@ exports.getAUser = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllVocaviveUsers = catchAsync(async (req, res) => {
-  console.log('api hitted');
+  console.log("api hitted");
   const users = await prisma.vocavive_user.findMany();
   if (users) {
     res.status(200).json(users);
   } else {
-    res.status(404).json('Empty List');
+    res.status(404).json("Empty List");
   }
 });
 
@@ -151,6 +155,6 @@ exports.getAVocaviveUser = catchAsync(async (req, res) => {
   if (user) {
     res.status(200).json(user);
   } else {
-    res.status(404).json('Empty List');
+    res.status(404).json("Empty List");
   }
 });

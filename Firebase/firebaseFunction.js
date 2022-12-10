@@ -1,27 +1,36 @@
-const {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} = require('firebase/auth');
-const initializeFirebase = require('../Firebase/firebase.init');
-
-initializeFirebase();
-const auth = getAuth();
+const fetch = require("node-fetch");
+const { WEB_KEY } = require("../config/constant");
 
 exports.createFirebaseUser = async (email, password) => {
-  try {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    return result;
-  } catch (error) {
-    return error.code;
-  }
+  const body = {
+    email,
+    password,
+  };
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${WEB_KEY}`,
+    {
+      method: "post",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  const data = await response.json();
+  return data;
 };
 
 exports.signInFirebaseUser = async (email, password) => {
-  try {
-    const result = signInWithEmailAndPassword(auth, email, password);
-    return result;
-  } catch (error) {
-    return error;
-  }
+  const body = {
+    email,
+    password,
+  };
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${WEB_KEY}`,
+    {
+      method: "post",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  const data = await response.json();
+  return data;
 };
