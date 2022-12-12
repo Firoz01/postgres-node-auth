@@ -27,10 +27,9 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
-//AIzaSyBaI1aIqyeeY7uQa3f3Go7KhfBslS0Mzs8;
-// app.get("/", (req, res) => {
-//   res.send("Edvive API 2.0");
-// });
+app.get("/", (req, res) => {
+  res.send("Edvive API 2.0");
+});
 
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
