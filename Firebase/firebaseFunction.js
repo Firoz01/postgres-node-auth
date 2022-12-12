@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-const { reset } = require("nodemon");
 const { WEB_KEY } = require("../config/constant");
 
 exports.createFirebaseUser = async (email, password) => {

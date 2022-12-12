@@ -1,4 +1,3 @@
-const { resourceUsage } = require("process");
 const prisma = require("../client");
 
 const {
@@ -11,16 +10,19 @@ const catchAsync = require("../utils/catchAsync");
 
 exports.passwordReset = catchAsync(async (req, res) => {
   const result = await passwordResetEmail(req.body.email);
-  console.log(result);
   res.status(200).json(result);
 });
 
 exports.passwordChange = catchAsync(async (req, res) => {
   const idToken = req.cookies["firebase token"];
-  const newPassword = req.body.newPassword;
-  const result = await userPasswordChange(idToken, newPassword);
-  console.log(result);
-  res.status(200).json(result);
+  if (idToken) {
+    const newPassword = req.body.newPassword;
+    const result = await userPasswordChange(idToken, newPassword);
+    console.log(result);
+    res.status(200).json(result);
+  } else {
+    res.status(500).json("your token was expired. Please login again");
+  }
 });
 
 exports.vocaviveSignup = catchAsync(async (req, res) => {
@@ -28,7 +30,6 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
   const { email, password, phone } = req.body;
 
   const result = await createFirebaseUser(email, password);
-  console.log(result);
   res.cookie("firebase token", result.idToken);
   if (result?.email) {
     const user = await prisma.user.create({
@@ -90,6 +91,7 @@ exports.vocaviveSignIn = catchAsync(async (req, res) => {
 exports.coursebookSignIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const result = await signInFirebaseUser(email, password);
+  res.cookie("firebase token", result.idToken);
   if (result?.email) {
     const getUser = await prisma.user.findMany({
       where: {
