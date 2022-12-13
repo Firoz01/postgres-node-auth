@@ -6,6 +6,8 @@ const AppError = require("./utils/appError.js");
 const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
+const catchAsync = require("./utils/catchAsync.js");
+const prisma = require("./client.js");
 
 dotenv.config({ path: "./.env" });
 
@@ -27,9 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
-app.get("/", (req, res) => {
-  res.send("Edvive API 2.0");
-});
+app.get(
+  "/",
+  catchAsync(async (req, res) => {
+    const users = await prisma.user.findMany();
+    res.status(200).json(users);
+  })
+);
 
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
