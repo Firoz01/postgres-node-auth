@@ -151,8 +151,10 @@ exports.coursebookSignIn = catchAsync(async (req, res) => {
 });
 
 exports.getAllUsers = catchAsync(async (req, res) => {
+  console.log("user api hitted");
   const users = await prisma.user.findMany();
-  req.connection.setTimeout(100000);
+  console.log("user data", users);
+
   res.status(200).json(users);
 });
 
