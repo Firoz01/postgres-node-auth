@@ -2,6 +2,7 @@ const express = require("express");
 const userController = require("../controllers/userController");
 
 const router = express.Router();
+router.get("/gcp-data", userController.gcpData);
 router.post("/password-reset", userController.passwordReset);
 router.post("/password-change", userController.passwordChange);
 router.post("/vocavive-signup", userController.vocaviveSignup);

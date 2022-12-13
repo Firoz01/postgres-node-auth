@@ -1,5 +1,7 @@
-const prisma = require('../client');
-const catchAsync = require('../utils/catchAsync');
+const prisma = require("../client");
+const catchAsync = require("../utils/catchAsync");
+
+
 
 exports.createPackage = catchAsync(async (req, res) => {
   const {
@@ -47,7 +49,7 @@ exports.createVariation = catchAsync(async (req, res) => {
 });
 
 exports.findAllPackages = catchAsync(async (req, res) => {
-  console.log('api for packages');
+  console.log("api for packages");
   const packages = await prisma.package.findMany();
   res.status(200).json(packages);
 });

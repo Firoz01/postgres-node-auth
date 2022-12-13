@@ -8,6 +8,22 @@ const {
 } = require("../Firebase/firebaseFunction");
 const catchAsync = require("../utils/catchAsync");
 
+exports.gcpData = catchAsync(async (req, res) => {
+  const data = {
+    name: "Muhammad Ishaq",
+    gender: "Male",
+    age: 23,
+    address: {
+      street: "87",
+      city: "Gultari Matyal Skardu",
+      state: "Gilgit Baltistan",
+      postalCode: "16350",
+    },
+    phoneNumber: [{ type: "personal", number: "116263747" }],
+  };
+  res.status(200).json(data);
+});
+
 exports.passwordReset = catchAsync(async (req, res) => {
   const result = await passwordResetEmail(req.body.email);
   res.status(200).json(result);

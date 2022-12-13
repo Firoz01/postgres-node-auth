@@ -32,10 +32,11 @@ const PORT = process.env.PORT || 5000;
 app.get(
   "/",
   catchAsync(async (req, res) => {
-    const users = await prisma.user.findMany();
+    const users = { user: "Md firoz mia", age: 24, role: "developer" };
     res.status(200).json(users);
   })
 );
+
 
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
