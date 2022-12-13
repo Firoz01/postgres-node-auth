@@ -8,9 +8,9 @@ const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const path = require("path");
-path.join(__dirname, ".env");
+//path.join(__dirname, ".env");
 
-//dotenv.config({ path: "./.env" });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! Shutting Down...");
