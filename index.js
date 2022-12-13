@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
 const catchAsync = require("./utils/catchAsync.js");
+const morgan = require("morgan");
 const path = require("path");
 //path.join(__dirname, ".env");
 
@@ -20,7 +21,7 @@ process.on("uncaughtException", (err) => {
 });
 
 const app = express();
-
+app.use(morgan(':date[clf] ":method :url"'));
 app.use(cors());
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
