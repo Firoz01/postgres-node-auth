@@ -7,9 +7,10 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
 const catchAsync = require("./utils/catchAsync.js");
-const prisma = require("./client.js");
+const path = require("path");
+path.join(__dirname, ".env");
 
-dotenv.config({ path: "./.env" });
+//dotenv.config({ path: "./.env" });
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! Shutting Down...");
@@ -36,7 +37,6 @@ app.get(
     res.status(200).json(users);
   })
 );
-
 
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
