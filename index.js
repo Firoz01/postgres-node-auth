@@ -9,6 +9,10 @@ const packageRouter = require("./routes/packageRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
+const { Storage } = require("@google-cloud/storage");
+
+const Multer = require("multer");
+
 //path.join(__dirname, ".env");
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
@@ -41,6 +45,37 @@ app.get(
 
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
+});
+
+const multer = Multer({
+  storage: Multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+let projectId = "";
+let keyFilename = "";
+let storage = new Storage({
+  projectId,
+  keyFilename,
+});
+
+const bucket = storage.bucket("");
+
+app.post("/upload", multer.single("image"), (req, res) => {
+  try {
+    if (req.file) {
+      const blob = bucket.file(req.file.originalname);
+      const blobStream = blob.createWriteStream();
+      blobStream.on("finish", () => {
+        res.status(200).send("Success");
+      });
+      blobStream.end(req.file.buffer);
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
 app.use("/api/v1/users", userRouter);
