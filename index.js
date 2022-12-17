@@ -9,11 +9,10 @@ const packageRouter = require("./routes/packageRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
-const { Storage } = require("@google-cloud/storage");
 
 const Multer = require("multer");
+const { uploadImage } = require("./helper/helper.js");
 
-//path.join(__dirname, ".env");
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -54,26 +53,20 @@ const multer = Multer({
   },
 });
 
-let projectId = "";
-let keyFilename = "";
-let storage = new Storage({
-  projectId,
-  keyFilename,
-});
-
-const bucket = storage.bucket("");
-
-app.post("/upload", multer.single("image"), (req, res) => {
+app.post("/upload", multer.single("image"), async (req, res) => {
   try {
     if (req.file) {
-      const blob = bucket.file(req.file.originalname);
-      const blobStream = blob.createWriteStream();
-      blobStream.on("finish", () => {
-        res.status(200).send("Success");
-      });
-      blobStream.end(req.file.buffer);
+      console.log(req.file);
+      const imageUrl = await uploadImage(req.file);
+      console.log(imageUrl);
+      res
+        .status(200)
+        .json({ message: "Upload was successfully", data: imageUrl });
+    } else {
+      res.status(404).json("file not found");
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 });
