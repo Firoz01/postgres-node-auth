@@ -7,7 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:abcd1234@34.170.132.86:5432/postgres?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,10 +15,24 @@ model User {
   email String @unique 
   phone String?
   vocavive vocavive_user?
+  blog blog [] 
   coursebook coursebook_user?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   @@unique([id,email])
+}
+
+model blog {
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [userId], references: [id])
+  userId Int 
+  title String
+  description String
+  snippet String
+  imageUrl String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
 }
 
 model vocavive_user {
@@ -65,8 +79,9 @@ model Variation {
   usd Int @default(00)
   discount_usd Int @default(00)
   status Boolean @default(false)
-  packages Package? @relation(fields: [package_id], references: [id], onDelete: Cascade)
-  package_id Int?
+  packages Package @relation(fields: [package_id], references: [id], onDelete: Cascade)
+  package_id Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+

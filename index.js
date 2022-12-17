@@ -6,13 +6,13 @@ const AppError = require("./utils/appError.js");
 const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
+const blogRouter = require("./routes/blogRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
 
 const Multer = require("multer");
 const { uploadImage } = require("./helper/helper.js");
-
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -73,6 +73,7 @@ app.post("/upload", multer.single("image"), async (req, res) => {
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
+app.use("/api/v1/blog", blogRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

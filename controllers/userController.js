@@ -154,7 +154,6 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   console.log("user api hitted");
   const users = await prisma.user.findMany();
   console.log("user data", users);
-
   res.status(200).json(users);
 });
 
