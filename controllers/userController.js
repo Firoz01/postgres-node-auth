@@ -43,7 +43,7 @@ exports.passwordChange = catchAsync(async (req, res) => {
 
 exports.vocaviveSignup = catchAsync(async (req, res) => {
   console.log("api hitted");
-  const { email, password, phone } = req.body;
+  const { email, password, phone, type } = req.body;
 
   const result = await createFirebaseUser(email, password);
   res.cookie("firebase token", result.idToken);
@@ -52,6 +52,7 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
       data: {
         email,
         phone,
+        type,
         vocavive: {
           create: {},
         },
@@ -190,6 +191,9 @@ exports.getAVocaviveUser = catchAsync(async (req, res) => {
   const user = await prisma.vocavive_user.findUnique({
     where: {
       id: parseInt(id),
+    },
+    include: {
+      parchase: {},
     },
   });
   if (user) {

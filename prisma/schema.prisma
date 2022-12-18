@@ -11,77 +11,97 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  email String @unique 
-  phone String?
-  vocavive vocavive_user?
-  blog blog [] 
+  id         Int              @id @default(autoincrement())
+  email      String           @unique
+  type       String @default("student")
+  phone      String?
+  vocavive   vocavive_user?
+  blog       blog[]
   coursebook coursebook_user?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@unique([id,email])
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([id, email])
 }
 
 model blog {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id])
-  userId Int 
-  title String
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  title       String
   description String
-  snippet String
-  imageUrl String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
+  snippet     String
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model vocavive_user {
-  id Int @id @default(autoincrement())
-  package Package? @relation(fields: [package_id], references: [id])
-  package_id Int? 
-  user User @relation(fields: [userId,userEmail], references: [id,email])
-  userId Int 
-  userEmail String 
-  parchase Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int             @id @default(autoincrement())
+  package    Package?        @relation(fields: [package_id], references: [id])
+  package_id Int?
+  user       User            @relation(fields: [userId, userEmail], references: [id, email])
+  userId     Int
+  userEmail  String
+  parchase   parchase_info[] 
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
   @@unique([userId, userEmail])
 }
+
 model coursebook_user {
-  id Int @id @default(autoincrement())
-  package Package? @relation(fields: [package_id], references: [id])
-  package_id Int? 
-  user User @relation(fields: [userId,userEmail], references: [id,email])
-  userId Int 
-  userEmail String 
-  parchase Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int             @id @default(autoincrement())
+  package    Package?        @relation(fields: [package_id], references: [id])
+  package_id Int?
+  user       User            @relation(fields: [userId, userEmail], references: [id, email])
+  userId     Int
+  userEmail  String
+  parchase   parchase_info[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
   @@unique([userId, userEmail])
+}
+
+model parchase_info {
+  id              Int               @id @default(autoincrement())
+  vocavive_user   vocavive_user  @relation(fields: [vocavive_id], references: [id])
+  vocavive_id Int
+  coursebook_user coursebook_user  @relation(fields: [coursebook_id], references: [id])
+  coursebook_id Int
+  packages        Package          @relation(fields: [package_id], references: [id])
+  package_id      Int
+  variation        Variation       @relation(fields: [variation_id], references: [id])
+  variation_id    Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model Package {
-  id Int @id @default(autoincrement())
-  name String
-  title String
-  vocavive_user vocavive_user[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  title           String
+  parchase_info   parchase_info[]
+  vocavive_user   vocavive_user[]
   coursebook_user coursebook_user[]
-  variations Variation[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  variations      Variation[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model Variation {
-  id Int @id @default(autoincrement())
-  expiration Int
-  bdt Int 
-  discount_bdt Int @default(00)
-  usd Int @default(00)
-  discount_usd Int @default(00)
-  status Boolean @default(false)
-  packages Package @relation(fields: [package_id], references: [id], onDelete: Cascade)
-  package_id Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int     @id @default(autoincrement())
+  expiration   Int
+  bdt          Int
+  discount_bdt Int     @default(0)
+  usd          Int     @default(0)
+  discount_usd Int     @default(0)
+  status       Boolean @default(false)
+  packages     Package @relation(fields: [package_id], references: [id], onDelete: Cascade)
+  package_id   Int
+  parchase_info parchase_info[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+ 
 }
-
