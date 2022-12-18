@@ -18,6 +18,23 @@ exports.createBlog = catchAsync(async (req, res) => {
   }
 });
 
+exports.getUsersBlog = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const blogs = await prisma.user.findMany({
+    where: {
+      id: Number(id),
+    },
+    include: {
+      blog: {},
+    },
+  });
+  if (blogs) {
+    res.status(200).json(blogs);
+  } else {
+    res.status(404).json(`Can't not find any blog with this id:${id}`);
+  }
+});
+
 exports.getAllBlog = catchAsync(async (req, res) => {
   const blogs = await prisma.blog.findMany();
   if (blogs) {

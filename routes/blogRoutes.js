@@ -10,4 +10,6 @@ router
   .put(Blog.updateBlog)
   .delete(Blog.deleteABlog);
 
+router.get("/user-blog/:id", Blog.getUsersBlog);
+
 module.exports = router;
