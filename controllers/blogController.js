@@ -12,7 +12,13 @@ exports.createBlog = catchAsync(async (req, res) => {
     },
   });
   if (newBlog) {
-    res.status(200).json("successfull");
+    res
+      .status(200)
+      .json({
+        status: "Success",
+        message: "Blog created successfully",
+        data: newBlog,
+      });
   } else {
     res.status(500).json("Unsuccessfull");
   }
