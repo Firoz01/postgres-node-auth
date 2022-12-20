@@ -160,7 +160,7 @@ exports.getAllUsers = catchAsync(async (req, res) => {
 
 exports.getAUser = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findMany({
     where: {
       id: parseInt(id),
     },
