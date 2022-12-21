@@ -11,6 +11,6 @@ router.post("/coursebook-signin", userController.coursebookSignIn);
 router.get("/vocavive-users", userController.getAllVocaviveUsers);
 router.get("/vocavive-users/:id", userController.getAVocaviveUser);
 router.get("/", userController.getAllUsers);
-router.route("/:id").get(userController.getAUser);
+router.get("/:id", userController.getAUser);
 
 module.exports = router;
