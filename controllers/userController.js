@@ -8,6 +8,8 @@ const {
 } = require("../Firebase/firebaseFunction");
 const catchAsync = require("../utils/catchAsync");
 
+
+
 exports.gcpData = catchAsync(async (req, res) => {
   const data = {
     name: "Muhammad Ishaq",
@@ -46,6 +48,7 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
   const { email, password, phone, type } = req.body;
 
   const result = await createFirebaseUser(email, password);
+  console.log(result);
   res.cookie("firebase token", result.idToken);
   if (result?.email) {
     const user = await prisma.user.create({
@@ -202,3 +205,5 @@ exports.getAVocaviveUser = catchAsync(async (req, res) => {
     res.status(404).json("Empty List");
   }
 });
+
+
