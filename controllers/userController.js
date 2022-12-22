@@ -190,6 +190,7 @@ exports.getAllVocaviveUsers = catchAsync(async (req, res) => {
 });
 
 exports.getAVocaviveUser = catchAsync(async (req, res) => {
+  console.log(req.params);
   const { id } = req.params;
   console.log(id);
   const user = await prisma.vocavive_user.findUnique({

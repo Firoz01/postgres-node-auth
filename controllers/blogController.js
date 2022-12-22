@@ -25,8 +25,13 @@ exports.createBlog = catchAsync(async (req, res) => {
 exports.getUsersBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
   let limit = req.query.limit;
+  let offset = req.query.offset;
+  console.log(limit);
   if (limit == undefined) {
     limit = 10;
+  }
+  if (offset == undefined) {
+    offset = 0;
   }
 
   const blogs = await prisma.user.findMany({
@@ -35,6 +40,7 @@ exports.getUsersBlog = catchAsync(async (req, res) => {
     },
     include: {
       blog: {
+        skip: Number(offset),
         take: Number(limit),
       },
     },
