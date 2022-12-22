@@ -8,8 +8,6 @@ const {
 } = require("../Firebase/firebaseFunction");
 const catchAsync = require("../utils/catchAsync");
 
-
-
 exports.gcpData = catchAsync(async (req, res) => {
   const data = {
     name: "Muhammad Ishaq",
@@ -179,8 +177,11 @@ exports.getAUser = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllVocaviveUsers = catchAsync(async (req, res) => {
-  console.log("api hitted");
-  const users = await prisma.vocavive_user.findMany();
+  let limit = req.query.limit;
+  if (limit == undefined) {
+    limit = 10;
+  }
+  const users = await prisma.vocavive_user.findMany({ take: Number(limit) });
   if (users) {
     res.status(200).json(users);
   } else {
@@ -205,5 +206,3 @@ exports.getAVocaviveUser = catchAsync(async (req, res) => {
     res.status(404).json("Empty List");
   }
 });
-
-

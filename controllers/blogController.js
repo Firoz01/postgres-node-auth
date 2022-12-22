@@ -12,13 +12,11 @@ exports.createBlog = catchAsync(async (req, res) => {
     },
   });
   if (newBlog) {
-    res
-      .status(200)
-      .json({
-        status: "Success",
-        message: "Blog created successfully",
-        data: newBlog,
-      });
+    res.status(200).json({
+      status: "Success",
+      message: "Blog created successfully",
+      data: newBlog,
+    });
   } else {
     res.status(500).json("Unsuccessfull");
   }
@@ -26,12 +24,19 @@ exports.createBlog = catchAsync(async (req, res) => {
 
 exports.getUsersBlog = catchAsync(async (req, res) => {
   const { id } = req.params;
+  let limit = req.query.limit;
+  if (limit == undefined) {
+    limit = 10;
+  }
+
   const blogs = await prisma.user.findMany({
     where: {
       id: Number(id),
     },
     include: {
-      blog: {},
+      blog: {
+        take: Number(limit),
+      },
     },
   });
   if (blogs) {
@@ -44,7 +49,9 @@ exports.getUsersBlog = catchAsync(async (req, res) => {
 exports.getAllBlog = catchAsync(async (req, res) => {
   const blogs = await prisma.blog.findMany();
   if (blogs) {
-    res.status(200).json(blogs);
+    const jstring = JSON.stringify(blogs);
+    jstring.toStream().pipe(res);
+    //res.status(200).json(blogs);
   } else {
     res.status(404).json("No blog found");
   }
