@@ -27,7 +27,9 @@ exports.createBlog = catchAsync(async (req, res) => {
       data: newBlog,
     });
   } else {
-    res.status(500).json("Unsuccessfull");
+    res
+      .status(500)
+      .json({ status: "failed", message: "Blog can't be created" });
   }
 });
 
