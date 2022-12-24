@@ -42,3 +42,23 @@ exports.getPurchaseInfoForVocavive = catchAsync(async (req, res) => {
     res.status(404).json(`No purchase information found with this id: ${id}`);
   }
 });
+
+exports.coursebookCreatePurchase = catchAsync(async (req, res) => {
+  console.log(req.body);
+  const result = await prisma.purchase_info.create({
+    data: {
+      package_id: req.body.package_id,
+      variation_id: req.body.variation_id,
+      coursebook_id: req.body.coursebook_id,
+    },
+  });
+  if (result) {
+    res.status(200).json({
+      status: "success",
+      message: "Purchase information for coursebook created successfully",
+      data: result,
+    });
+  } else {
+    res.status(500).json("can't create purchase for coursebook");
+  }
+});

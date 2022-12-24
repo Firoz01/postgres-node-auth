@@ -8,4 +8,6 @@ router.get(
   purchaseController.getPurchaseInfoForVocavive
 );
 
+router.post("/create-purchase", purchaseController.coursebookCreatePurchase);
+
 module.exports = router;

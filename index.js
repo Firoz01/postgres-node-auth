@@ -12,9 +12,10 @@ const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
 
-
 const { uploadImage } = require("./helper/imageUploader.js");
-const { authTokenVerifyMiddleware } = require("./middleware/verifyMiddleware.js");
+const {
+  authTokenVerifyMiddleware,
+} = require("./middleware/verifyMiddleware.js");
 const { multer } = require("./utils/multer.js");
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
@@ -37,8 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
-
-
 app.get(
   "/",
   authTokenVerifyMiddleware,
@@ -51,7 +50,6 @@ app.get(
 const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
 });
-
 
 app.post("/upload", multer.single("image"), async (req, res) => {
   try {
@@ -75,6 +73,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
 app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/vocavive/purchase", purchaseRouter);
+app.use("/api/v1/coursebook/purchase", purchaseRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
