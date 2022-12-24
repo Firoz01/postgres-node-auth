@@ -43,7 +43,7 @@ model vocavive_user {
   user       User            @relation(fields: [userId, userEmail], references: [id, email])
   userId     Int
   userEmail  String
-  parchase   parchase_info[] 
+  parchase   purchase_info[] 
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
@@ -57,19 +57,19 @@ model coursebook_user {
   user       User            @relation(fields: [userId, userEmail], references: [id, email])
   userId     Int
   userEmail  String
-  parchase   parchase_info[]
+  purchase   purchase_info[]
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
   @@unique([userId, userEmail])
 }
 
-model parchase_info {
+model purchase_info {
   id              Int               @id @default(autoincrement())
-  vocavive_user   vocavive_user  @relation(fields: [vocavive_id], references: [id])
-  vocavive_id Int
-  coursebook_user coursebook_user  @relation(fields: [coursebook_id], references: [id])
-  coursebook_id Int
+  vocavive_user   vocavive_user ? @relation(fields: [vocavive_id], references: [id])
+  vocavive_id Int ?
+  coursebook_user coursebook_user ? @relation(fields: [coursebook_id], references: [id])
+  coursebook_id Int ?
   packages        Package          @relation(fields: [package_id], references: [id])
   package_id      Int
   variation        Variation       @relation(fields: [variation_id], references: [id])
@@ -82,7 +82,7 @@ model Package {
   id              Int               @id @default(autoincrement())
   name            String
   title           String
-  parchase_info   parchase_info[]
+  purchase_info   purchase_info[]
   vocavive_user   vocavive_user[]
   coursebook_user coursebook_user[]
   variations      Variation[]
@@ -100,7 +100,7 @@ model Variation {
   status       Boolean @default(false)
   packages     Package @relation(fields: [package_id], references: [id], onDelete: Cascade)
   package_id   Int
-  parchase_info parchase_info[]
+  purchase_info purchase_info[]
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
  

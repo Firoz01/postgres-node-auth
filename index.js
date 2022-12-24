@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
 const blogRouter = require("./routes/blogRoutes");
-const parchaseRouter = require("./routes/parchaseRoutes");
+const purchaseRouter = require("./routes/purchaseRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
@@ -111,7 +111,7 @@ app.post("/upload", multer.single("image"), async (req, res) => {
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
 app.use("/api/v1/blog", blogRouter);
-app.use("/api/v1/parchase", parchaseRouter);
+app.use("/api/v1/vocavive/purchase", purchaseRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
