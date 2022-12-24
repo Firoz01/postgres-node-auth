@@ -12,8 +12,10 @@ const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
 
-const Multer = require("multer");
-const { uploadImage } = require("./helper/helper.js");
+
+const { uploadImage } = require("./helper/imageUploader.js");
+const { authTokenVerifyMiddleware } = require("./middleware/verifyMiddleware.js");
+const { multer } = require("./utils/multer.js");
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -35,40 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 5000;
 
-let firebaseApp = null;
 
-const authTokenVerifyMiddleware = (req, res, next) => {
-  var admin = require("firebase-admin");
-
-  var serviceAccount = require("./edvive-node-firebase-adminsdk-9hzfr-1a91eb2c4e.json");
-  if (!firebaseApp) {
-    firebaseApp = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  }
-  const tokenString = req.headers["authorization"]
-    ? req.headers["authorization"].split(" ")
-    : null;
-  if (!tokenString) {
-    res.send("No header provided");
-  } else if (!tokenString[1]) {
-    res.send("no token provided");
-  } else {
-    const { getAuth } = require("firebase-admin/auth");
-    getAuth()
-      .verifyIdToken(tokenString[1])
-      .then((decodedToken) => {
-        console.log(decodedToken);
-        const uid = decodedToken.uid;
-        console.log(uid);
-        next();
-      })
-      .catch((error) => {
-        res.send(error);
-      });
-  }
-  console.log(tokenString);
-};
 
 app.get(
   "/",
@@ -83,12 +52,6 @@ const server = app.listen(PORT, () => {
   console.log(`The server is running at port: ${PORT}`);
 });
 
-const multer = Multer({
-  storage: Multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024,
-  },
-});
 
 app.post("/upload", multer.single("image"), async (req, res) => {
   try {

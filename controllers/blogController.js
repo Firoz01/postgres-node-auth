@@ -1,14 +1,23 @@
 const prisma = require("../client");
+const { uploadImage } = require("../helper/imageUploader");
 const catchAsync = require("../utils/catchAsync");
 
 exports.createBlog = catchAsync(async (req, res) => {
+  console.log(req.body);
+  let imageUrl;
+  if (req?.file) {
+    imageUrl = await uploadImage(req.file);
+    console.log(imageUrl);
+  } else {
+    imageUrl = null;
+  }
   const newBlog = await prisma.blog.create({
     data: {
-      userId: req.body.userId,
+      userId: Number(req.body.userId),
       title: req.body.title,
       description: req.body.description,
       snippet: req.body.snippet,
-      imageUrl: req.body.imageUrl,
+      imageUrl: imageUrl,
     },
   });
   if (newBlog) {
@@ -55,9 +64,7 @@ exports.getUsersBlog = catchAsync(async (req, res) => {
 exports.getAllBlog = catchAsync(async (req, res) => {
   const blogs = await prisma.blog.findMany();
   if (blogs) {
-    const jstring = JSON.stringify(blogs);
-    jstring.toStream().pipe(res);
-    //res.status(200).json(blogs);
+    res.status(200).json(blogs);
   } else {
     res.status(404).json("No blog found");
   }
