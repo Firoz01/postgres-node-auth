@@ -1,17 +1,8 @@
 const prisma = require("../client");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-// const dotenv = require("dotenv");
-// const path = require("path");
-// dotenv.config({ path: path.resolve(__dirname, "../") });
-const {
-  createFirebaseUser,
-  signInFirebaseUser,
-  passwordResetEmail,
-  userPasswordChange,
-} = require("../Firebase/firebaseFunction");
-const catchAsync = require("../utils/catchAsync");
 
+const catchAsync = require("../utils/catchAsync");
 
 exports.passwordReset = catchAsync(async (req, res) => {
   const result = await passwordResetEmail(req.body.email);
@@ -62,98 +53,218 @@ exports.vocaviveSignup = catchAsync(async (req, res) => {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    res
-      .status(200)
-      .json({
-        message: "User Created Successfully",
-        data: user,
-        accessToken,
-        refreshToken,
-      });
+    res.status(200).json({
+      message: "User Created Successfully",
+      data: user,
+      accessToken,
+      refreshToken,
+    });
   }
 });
 
 exports.vocaviveSignIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const result = await signInFirebaseUser(email, password);
-  console.log(result);
-  res.cookie("firebase token", result.idToken);
-  if (result?.email) {
-    const getUser = await prisma.user.findMany({
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  if (user) {
+    const checkIntoVocavive = await prisma.user.findMany({
       where: {
         vocavive: {
           userEmail: email,
         },
       },
-      include: {
-        vocavive: {},
-      },
     });
 
-    if (getUser.length !== 0) {
-      res.status(200).json({
-        status: "Success",
-        message: "Signin Successfully in vocavive app",
-        data: getUser,
-      });
+    const userDataForToken = {
+      email: user.email,
+      type: user.type,
+    };
+    if (checkIntoVocavive) {
+      const validity = await bcrypt.compare(password, user.password);
+      if (!validity) {
+        res.status(400).json("Wrong Password");
+      } else {
+        const accessToken = await jwt.sign(
+          userDataForToken,
+          process.env.ACCESS_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+        const refreshToken = await jwt.sign(
+          userDataForToken,
+          process.env.REFRESH_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.status(200).json({
+          message: "login Successfully Vocavive",
+          data: {
+            email: user.email,
+            type: user.type,
+            phone: user.phone,
+          },
+          accessToken,
+          refreshToken,
+        });
+      }
     } else {
-      const getUser = prisma.user.findUnique({
-        where: {
-          email,
-        },
-        select: {
-          id: true,
+      const createNewUserForVocavive = await prisma.vocavive_user.create({
+        data: {
+          userId: user.id,
+          userEmail: user.email,
         },
       });
-      res.status(200).json(getUser);
+
+      if (createNewUserForVocavive) {
+        const accessToken = await jwt.sign(
+          userDataForToken,
+          process.env.ACCESS_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+        const refreshToken = await jwt.sign(
+          userDataForToken,
+          process.env.REFRESH_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.status(200).json({
+          message: "login successfull vocavive with new user creation",
+          data: {
+            email: user.email,
+            type: user.type,
+            phone: user.phone,
+          },
+          accessToken,
+          refreshToken,
+        });
+      } else {
+        res.status(500).json("User create for vocavive failed");
+      }
     }
   } else {
-    res.status(404).json("User not found");
+    res.status(404).json("User Not found in the database");
   }
 });
 exports.coursebookSignIn = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const result = await signInFirebaseUser(email, password);
-  res.cookie("firebase token", result.idToken);
-  if (result?.email) {
-    const getUser = await prisma.user.findMany({
+
+  const user = await prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  console.log(user);
+
+  if (user) {
+    const checkIntoCourseBook = await prisma.user.findMany({
       where: {
         coursebook: {
           userEmail: email,
         },
       },
-      include: {
-        coursebook: {},
-      },
     });
 
-    if (getUser.length !== 0) {
-      res.status(200).json({
-        status: "Success",
-        message: "Signin Successfully in coursebook app",
-        data: getUser,
-      });
-    } else {
-      const getUser = await prisma.user.findUnique({
-        where: {
-          email,
-        },
-        select: {
-          id: true,
-          email: true,
-        },
-      });
-      if (getUser?.id) {
-        const saveUserInCoursebookDb = await prisma.coursebook_user.create({
-          data: {
-            userId: getUser.id,
-            userEmail: getUser.email,
-          },
+    const userDataForToken = {
+      email: user.email,
+      type: user.type,
+    };
+
+    if (checkIntoCourseBook[0]) {
+      const validity = await bcrypt.compare(password, user.password);
+      if (!validity) {
+        res.status(400).json("Wrong Password");
+      } else {
+        const accessToken = await jwt.sign(
+          userDataForToken,
+          process.env.ACCESS_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+        const refreshToken = await jwt.sign(
+          userDataForToken,
+          process.env.REFRESH_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
         });
-        console.log(saveUserInCoursebookDb);
-        res.status(200).json(saveUserInCoursebookDb);
+        res.status(200).json({
+          message: "login Successfully In CourseBook",
+          data: {
+            email: user.email,
+            type: user.type,
+            phone: user.phone,
+          },
+          accessToken,
+          refreshToken,
+        });
+      }
+    } else {
+      const createNewUserForCourseBook = await prisma.coursebook_user.create({
+        data: {
+          userId: user.id,
+          userEmail: user.email,
+        },
+      });
+
+      if (createNewUserForCourseBook) {
+        const accessToken = await jwt.sign(
+          userDataForToken,
+          process.env.ACCESS_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+        const refreshToken = await jwt.sign(
+          userDataForToken,
+          process.env.REFRESH_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        );
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.status(200).json({
+          message: "login successfull into CourseBook with new user creation",
+          data: {
+            email: user.email,
+            type: user.type,
+            phone: user.phone,
+          },
+          accessToken,
+          refreshToken,
+        });
+      } else {
+        res.status(500).json("User creation for CourseBook  failed");
       }
     }
+  } else {
+    res.status(404).json("User Not found in the database");
   }
 });
 
