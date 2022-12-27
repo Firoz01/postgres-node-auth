@@ -1,5 +1,9 @@
 const prisma = require("../client");
-
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+// const dotenv = require("dotenv");
+// const path = require("path");
+// dotenv.config({ path: path.resolve(__dirname, "../") });
 const {
   createFirebaseUser,
   signInFirebaseUser,
@@ -8,21 +12,6 @@ const {
 } = require("../Firebase/firebaseFunction");
 const catchAsync = require("../utils/catchAsync");
 
-exports.gcpData = catchAsync(async (req, res) => {
-  const data = {
-    name: "Muhammad Ishaq",
-    gender: "Male",
-    age: 23,
-    address: {
-      street: "87",
-      city: "Gultari Matyal Skardu",
-      state: "Gilgit Baltistan",
-      postalCode: "16350",
-    },
-    phoneNumber: [{ type: "personal", number: "116263747" }],
-  };
-  res.status(200).json(data);
-});
 
 exports.passwordReset = catchAsync(async (req, res) => {
   const result = await passwordResetEmail(req.body.email);
@@ -42,29 +31,45 @@ exports.passwordChange = catchAsync(async (req, res) => {
 });
 
 exports.vocaviveSignup = catchAsync(async (req, res) => {
-  console.log("api hitted");
   const { email, password, phone, type } = req.body;
 
-  const result = await createFirebaseUser(email, password);
-  console.log(result);
-  res.cookie("firebase token", result.idToken);
-  if (result?.email) {
-    const user = await prisma.user.create({
-      data: {
-        email,
-        phone,
-        type,
-        vocavive: {
-          create: {},
-        },
+  const salt = await bcrypt.genSalt(10);
+
+  const hash = await bcrypt.hash(password, salt);
+
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hash,
+      phone,
+      type,
+      vocavive: {
+        create: {},
       },
-      include: {
-        vocavive: true,
-      },
+    },
+    include: {
+      vocavive: true,
+    },
+  });
+  if (user) {
+    const accessToken = await jwt.sign(user, process.env.ACCESS_SECRET, {
+      expiresIn: "1h",
     });
-    res.status(200).json(user);
-  } else {
-    res.status(500).json(result);
+    const refreshToken = await jwt.sign(user, process.env.REFRESH_SECRET, {
+      expiresIn: "1d",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res
+      .status(200)
+      .json({
+        message: "User Created Successfully",
+        data: user,
+        accessToken,
+        refreshToken,
+      });
   }
 });
 

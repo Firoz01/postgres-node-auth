@@ -1,3 +1,6 @@
+const jwt = require("jsonwebtoken");
+const prisma = require("../client");
+
 exports.authTokenVerifyMiddleware = (req, res, next) => {
   var admin = require("firebase-admin");
   let firebaseApp = null;
@@ -29,4 +32,35 @@ exports.authTokenVerifyMiddleware = (req, res, next) => {
       });
   }
   console.log(tokenString);
+};
+
+exports.verifyUserWithJWT = async (req, res, next) => {
+  const { authorization } = req.headers;
+  if (authorization !== undefined) {
+    const accessToken = authorization.split("Bearer ")[1];
+    try {
+      const user = await jwt.verify(accessToken, process.env.ACCESS_SECRET);
+      const checkUserInDB = await prisma.user.findUnique({
+        where: {
+          email: user.email,
+        },
+        select: {
+          email: true,
+          type: true,
+        },
+      });
+      if (checkUserInDB) {
+        next();
+      } else {
+        return res.status(404).json({
+          error:
+            "User with this token not found in the Database. Are you hacker? tring to hack my db?",
+        });
+      }
+    } catch (error) {
+      return res.status(401).json({ error: "expire access token " });
+    }
+  } else {
+    return res.status(401).json({ error: "unauthorized" });
+  }
 };

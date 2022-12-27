@@ -8,6 +8,7 @@ const userRouter = require("./routes/userRoutes");
 const packageRouter = require("./routes/packageRoutes");
 const blogRouter = require("./routes/blogRoutes");
 const purchaseRouter = require("./routes/purchaseRoutes");
+const authRouter = require("./routes/authRoutes");
 const catchAsync = require("./utils/catchAsync.js");
 const morgan = require("morgan");
 const path = require("path");
@@ -16,6 +17,7 @@ const jwt = require("jsonwebtoken");
 const { uploadImage } = require("./helper/imageUploader.js");
 const {
   authTokenVerifyMiddleware,
+  verifyUserWithJWT,
 } = require("./middleware/verifyMiddleware.js");
 const { multer } = require("./utils/multer.js");
 
@@ -91,47 +93,7 @@ app.post("/api/test", async (req, res) => {
   }
 });
 
-app.post("/api/refresh-token", async (req, res) => {
-  const { refreshToken } = req.cookies;
-  if (refreshToken !== undefined) {
-    try {
-      const userData = await jwt.verify(
-        refreshToken,
-        process.env.REFRESH_SECRET
-      );
-      delete userData.iat;
-      delete userData.exp;
-      delete userData.name;
-      if (userData) {
-        const accessToken = await jwt.sign(
-          userData,
-          process.env.ACCESS_SECRET,
-          {
-            expiresIn: "1m",
-          }
-        );
-        const refresh = await jwt.sign(userData, process.env.REFRESH_SECRET, {
-          expiresIn: "1d",
-        });
-        res.cookie("refreshToken", refresh, {
-          httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000,
-        });
-        res.status(200).json({ accessToken, refreshToken: refresh });
-      } else {
-        res.status(404).json("user not found");
-      }
-    } catch (error) {
-      return res
-        .status(404)
-        .json({ error: "exprire refresh token please login again" });
-    }
-  } else {
-    return res
-      .status(404)
-      .json({ error: "exprire refresh token please login again" });
-  }
-});
+app.post("/api/refresh-token", async (req, res) => {});
 
 app.post("/upload", multer.single("image"), async (req, res) => {
   try {
@@ -150,12 +112,12 @@ app.post("/upload", multer.single("image"), async (req, res) => {
     res.status(500).json(error);
   }
 });
-
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
 app.use("/api/v1/blog", blogRouter);
-app.use("/api/v1/vocavive/purchase", purchaseRouter);
-app.use("/api/v1/coursebook/purchase", purchaseRouter);
+app.use("/api/v1/vocavive/purchase", verifyUserWithJWT, purchaseRouter);
+app.use("/api/v1/coursebook/purchase", verifyUserWithJWT, purchaseRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
