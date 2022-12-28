@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const catchAsync = require("../utils/catchAsync");
 const { ACCESS_SECRET, REFRESH_SECRET } = require("../config/constant");
+const AppError = require("../utils/appError");
 
 const createJwtToken = async (tokenData, res, resMessage, resData) => {
   const accessToken = await jwt.sign(tokenData, ACCESS_SECRET, {
@@ -277,4 +278,39 @@ exports.courseBookSignup = catchAsync(async (req, res) => {
       .status(500)
       .json("Server failed when tring to create New user to the database");
   }
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next(
+      new AppError("You are not logged in. Please Log in to grant acess", 401)
+    );
+  }
+  const decoded = await jwt.verify(token, ACCESS_SECRET);
+  const currentUser = await prisma.user.findUnique({
+    where: {
+      email: decoded.email,
+    },
+    select: {
+      email: true,
+      type: true,
+    },
+  });
+
+  if (!currentUser) {
+    return next(
+      new AppError("The user belonging to this token does no longer exist", 401)
+    );
+  }
+
+  req.user = currentUser;
+  next();
 });

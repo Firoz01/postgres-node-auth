@@ -2,12 +2,19 @@ const prisma = require("../client");
 
 const catchAsync = require("../utils/catchAsync");
 
-
 exports.getAllUsers = catchAsync(async (req, res) => {
   console.log("user api hitted");
-  const users = await prisma.user.findMany();
-  console.log("user data", users);
-  res.status(200).json(users);
+  function exclude(user, keys) {
+    for (let key of keys) {
+      delete user[key];
+    }
+    return user;
+  }
+
+  const users = await prisma.user.findMany({ where: { id: 1 } });
+  const withoutPassword = exclude(users, ["password"]);
+  console.log("user data");
+  res.status(200).json(withoutPassword);
 });
 
 exports.getAUser = catchAsync(async (req, res, next) => {

@@ -52,7 +52,7 @@ const server = app.listen(PORT, () => {
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
-app.use("/api/v1/blog", verifyUserWithJWT, blogRouter);
+app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/vocavive/purchase", verifyUserWithJWT, purchaseRouter);
 app.use("/api/v1/coursebook/purchase", verifyUserWithJWT, purchaseRouter);
 

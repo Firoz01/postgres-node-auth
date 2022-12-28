@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Blog = require("../controllers/blogController");
+const AuthController = require("../controllers/authController");
 const { verifyUserWithJWT } = require("../middleware/verifyMiddleware");
 const { multer } = require("../utils/multer");
 
@@ -10,9 +11,9 @@ router.post(
   multer.single("imageUrl"),
   Blog.createBlog
 );
-router.get("/", Blog.getAllBlog);
+router.get("/", AuthController.protect, Blog.getAllBlog);
 router
-  .route("/:id", verifyUserWithJWT)
+  .route("/:id")
   .get(Blog.getABlog)
   .put(Blog.updateBlog)
   .delete(Blog.deleteABlog);
